@@ -2,6 +2,7 @@ package bri
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"io/ioutil"
 	"log"
@@ -112,9 +113,13 @@ func (c *Client) ExecuteRequest(req *http.Request, v interface{}) error {
 		return err
 	}
 
+	logger.Println("BRI HTTP status response: ", res.StatusCode)
 	if logLevel > 2 {
-		logger.Println("BRI http status response: ", res.StatusCode)
 		logger.Println("BRI body response: ", string(resBody))
+	}
+
+	if res.StatusCode == 404 {
+		return errors.New("invalid url")
 	}
 
 	if v != nil && res.StatusCode == 200 {
