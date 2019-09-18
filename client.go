@@ -113,8 +113,8 @@ func (c *Client) ExecuteRequest(req *http.Request, v interface{}) error {
 		return err
 	}
 
-	logger.Println("BRI HTTP status response: ", res.StatusCode)
 	if logLevel > 2 {
+		logger.Println("BRI HTTP status response: ", res.StatusCode)
 		logger.Println("BRI body response: ", string(resBody))
 	}
 
@@ -122,7 +122,7 @@ func (c *Client) ExecuteRequest(req *http.Request, v interface{}) error {
 		return errors.New("invalid url")
 	}
 
-	if v != nil && res.StatusCode == 200 {
+	if v != nil {
 		if err = json.Unmarshal(resBody, v); err != nil {
 			return err
 		}
