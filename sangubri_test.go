@@ -1,8 +1,11 @@
 package bri
 
 import (
+	"math/rand"
+	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -94,5 +97,101 @@ func (bri *BriSanguTestSuite) TestGetTokenFailedInvalidProduct() {
 	}
 
 	assert.Equal(bri.T(), false, containsProduct)
+	assert.Equal(bri.T(), nil, err)
+}
+
+func (bri *BriSanguTestSuite) TestCreateVaSuccess() {
+	briClient := NewClient()
+	briClient.BaseUrl = "https://sandbox.partner.api.bri.co.id"
+	briClient.ClientId = "p6FGDaCZGoaL8F26dvjCdBfhl8VA0wjf"
+	briClient.ClientSecret = "5L4QGueGYTdzin30"
+	coreGateway := CoreGateway{
+		Client: briClient,
+	}
+	tokenResp, err := coreGateway.GetToken()
+
+	random := strconv.Itoa(rand.Intn(10000))
+	dt := time.Now().AddDate(0, 3, 0)
+	expired := dt.Format("2006-01-02 15:04:05")
+	req := CreateVaRequest{
+		InstitutionCode: "J104408",
+		BrivaNo:         "77777",
+		CustCode:        "123123" + random,
+		Nama:            "Orang Baik " + random,
+		Amount:          random,
+		Keterangan:      "test",
+		ExpiredDate:     expired,
+	}
+
+	token := tokenResp.AccessToken
+	resp, err := coreGateway.CreateVA(token, req)
+
+	assert.Equal(bri.T(), true, resp.Status)
+	assert.Equal(bri.T(), "00", resp.ResponseCode)
+	assert.Equal(bri.T(), nil, err)
+}
+
+func (bri *BriSanguTestSuite) TestCreateVaFailedDuplicate() {
+	briClient := NewClient()
+	briClient.BaseUrl = "https://sandbox.partner.api.bri.co.id"
+	briClient.ClientId = "p6FGDaCZGoaL8F26dvjCdBfhl8VA0wjf"
+	briClient.ClientSecret = "5L4QGueGYTdzin30"
+	coreGateway := CoreGateway{
+		Client: briClient,
+	}
+	tokenResp, err := coreGateway.GetToken()
+
+	random := strconv.Itoa(rand.Intn(10000))
+	dt := time.Now().AddDate(0, 3, 0)
+	expired := dt.Format("2006-01-02 15:04:05")
+	req := CreateVaRequest{
+		InstitutionCode: "J104408",
+		BrivaNo:         "77777",
+		CustCode:        "123123" + random,
+		Nama:            "Orang Baik " + random,
+		Amount:          random,
+		Keterangan:      "test",
+		ExpiredDate:     expired,
+	}
+
+	token := tokenResp.AccessToken
+	resp, err := coreGateway.CreateVA(token, req)
+
+	// create second request
+	resp, err = coreGateway.CreateVA(token, req)
+
+	assert.Equal(bri.T(), false, resp.Status)
+	assert.Equal(bri.T(), "13", resp.ResponseCode)
+	assert.Equal(bri.T(), nil, err)
+}
+
+func (bri *BriSanguTestSuite) TestCreateVaFailedExpiredMoreThanThreeMonths() {
+	briClient := NewClient()
+	briClient.BaseUrl = "https://sandbox.partner.api.bri.co.id"
+	briClient.ClientId = "p6FGDaCZGoaL8F26dvjCdBfhl8VA0wjf"
+	briClient.ClientSecret = "5L4QGueGYTdzin30"
+	coreGateway := CoreGateway{
+		Client: briClient,
+	}
+	tokenResp, err := coreGateway.GetToken()
+
+	random := strconv.Itoa(rand.Intn(10000))
+	dt := time.Now().AddDate(0, 3, 1)
+	expired := dt.Format("2006-01-02 15:04:05")
+	req := CreateVaRequest{
+		InstitutionCode: "J104408",
+		BrivaNo:         "77777",
+		CustCode:        "123123" + random,
+		Nama:            "Orang Baik " + random,
+		Amount:          random,
+		Keterangan:      "test",
+		ExpiredDate:     expired,
+	}
+
+	token := tokenResp.AccessToken
+	resp, err := coreGateway.CreateVA(token, req)
+
+	assert.Equal(bri.T(), false, resp.Status)
+	assert.Equal(bri.T(), "12", resp.ResponseCode)
 	assert.Equal(bri.T(), nil, err)
 }
