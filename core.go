@@ -9,7 +9,7 @@ import (
 
 const (
 	TOKEN_PATH      = "/oauth/client_credential/accesstoken?grant_type=client_credentials"
-	CREATE_VA_PATH  = "/v1/briva"
+	VA_PATH         = "/v1/briva"
 	BRI_TIME_FORMAT = "2006-01-02T15:04:05.999Z"
 )
 
@@ -51,7 +51,7 @@ func (gateway *CoreGateway) CreateVA(token string, req CreateVaRequest) (res VaR
 	method := "POST"
 	body, err := json.Marshal(req)
 	timestamp := getTimestamp(BRI_TIME_FORMAT)
-	signature := generateSignature(CREATE_VA_PATH, "POST", token, timestamp, string(body), gateway.Client.ClientSecret)
+	signature := generateSignature(VA_PATH, method, token, timestamp, string(body), gateway.Client.ClientSecret)
 
 	headers := map[string]string{
 		"Authorization": token,
@@ -60,7 +60,30 @@ func (gateway *CoreGateway) CreateVA(token string, req CreateVaRequest) (res VaR
 		"Content-Type":  "application/json",
 	}
 
-	err = gateway.Call(method, CREATE_VA_PATH, headers, strings.NewReader(string(body)), &res)
+	err = gateway.Call(method, VA_PATH, headers, strings.NewReader(string(body)), &res)
+
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (gateway *CoreGateway) UpdateVA(token string, req CreateVaRequest) (res VaResponse, err error) {
+	token = "Bearer " + token
+	method := "PUT"
+	body, err := json.Marshal(req)
+	timestamp := getTimestamp(BRI_TIME_FORMAT)
+	signature := generateSignature(VA_PATH, method, token, timestamp, string(body), gateway.Client.ClientSecret)
+
+	headers := map[string]string{
+		"Authorization": token,
+		"BRI-Timestamp": timestamp,
+		"BRI-Signature": signature,
+		"Content-Type":  "application/json",
+	}
+
+	err = gateway.Call(method, VA_PATH, headers, strings.NewReader(string(body)), &res)
 
 	if err != nil {
 		return
