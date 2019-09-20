@@ -1,7 +1,11 @@
 package bri
 
 import (
+	"math/rand"
+	"strconv"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -15,7 +19,6 @@ func TestBriSanguTestSuite(t *testing.T) {
 	suite.Run(t, new(BriSanguTestSuite))
 }
 
-/**
 func (bri *BriSanguTestSuite) TestGetTokenSuccess() {
 	briClient := NewClient()
 	briClient.BaseUrl = "https://sandbox.partner.api.bri.co.id"
@@ -285,7 +288,7 @@ func (bri *BriSanguTestSuite) TestUpdateVaFailedExpiredMoreThanThreeMonths() {
 	assert.Equal(bri.T(), "12", resp.ResponseCode)
 	assert.Equal(bri.T(), nil, err)
 }
-**/
+
 func (bri *BriSanguTestSuite) TestGetReportVaSuccess() {
 	briClient := NewClient()
 	briClient.BaseUrl = "https://sandbox.partner.api.bri.co.id"
