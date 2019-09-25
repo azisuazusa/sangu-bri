@@ -117,9 +117,9 @@ func (bri *BriSanguTestSuite) TestCreateVaSuccess() {
 		InstitutionCode: "J104408",
 		BrivaNo:         "77777",
 		CustCode:        "123123" + random,
-		Nama:            "Orang Baik " + random,
+		Name:            "Orang Baik " + random,
 		Amount:          random,
-		Keterangan:      "test",
+		Description:     "test",
 		ExpiredDate:     expired,
 	}
 
@@ -148,9 +148,9 @@ func (bri *BriSanguTestSuite) TestCreateVaFailedDuplicate() {
 		InstitutionCode: "J104408",
 		BrivaNo:         "77777",
 		CustCode:        "123123" + random,
-		Nama:            "Orang Baik " + random,
+		Name:            "Orang Baik " + random,
 		Amount:          random,
-		Keterangan:      "test",
+		Description:     "test",
 		ExpiredDate:     expired,
 	}
 
@@ -182,9 +182,9 @@ func (bri *BriSanguTestSuite) TestCreateVaFailedExpiredMoreThanThreeMonths() {
 		InstitutionCode: "J104408",
 		BrivaNo:         "77777",
 		CustCode:        "123123" + random,
-		Nama:            "Orang Baik " + random,
+		Name:            "Orang Baik " + random,
 		Amount:          random,
-		Keterangan:      "test",
+		Description:     "test",
 		ExpiredDate:     expired,
 	}
 
@@ -213,9 +213,9 @@ func (bri *BriSanguTestSuite) TestUpdateVaSuccess() {
 		InstitutionCode: "J104408",
 		BrivaNo:         "77777",
 		CustCode:        "1231233313",
-		Nama:            "Orang Baik " + random,
+		Name:            "Orang Baik " + random,
 		Amount:          random,
-		Keterangan:      "test",
+		Description:     "test",
 		ExpiredDate:     expired,
 	}
 
@@ -244,9 +244,9 @@ func (bri *BriSanguTestSuite) TestUpdateVaFailedCustomerNotFound() {
 		InstitutionCode: "J104408",
 		BrivaNo:         "77777",
 		CustCode:        "1231233313555",
-		Nama:            "Orang Baik " + random,
+		Name:            "Orang Baik " + random,
 		Amount:          random,
-		Keterangan:      "test",
+		Description:     "test",
 		ExpiredDate:     expired,
 	}
 
@@ -275,9 +275,9 @@ func (bri *BriSanguTestSuite) TestUpdateVaFailedExpiredMoreThanThreeMonths() {
 		InstitutionCode: "J104408",
 		BrivaNo:         "77777",
 		CustCode:        "1231233313",
-		Nama:            "Orang Baik " + random,
+		Name:            "Orang Baik " + random,
 		Amount:          random,
-		Keterangan:      "test",
+		Description:     "test",
 		ExpiredDate:     expired,
 	}
 
@@ -286,5 +286,80 @@ func (bri *BriSanguTestSuite) TestUpdateVaFailedExpiredMoreThanThreeMonths() {
 
 	assert.Equal(bri.T(), false, resp.Status)
 	assert.Equal(bri.T(), "12", resp.ResponseCode)
+	assert.Equal(bri.T(), nil, err)
+}
+
+func (bri *BriSanguTestSuite) TestGetReportVaSuccess() {
+	briClient := NewClient()
+	briClient.BaseUrl = "https://sandbox.partner.api.bri.co.id"
+	briClient.ClientId = "p6FGDaCZGoaL8F26dvjCdBfhl8VA0wjf"
+	briClient.ClientSecret = "5L4QGueGYTdzin30"
+	coreGateway := CoreGateway{
+		Client: briClient,
+	}
+	tokenResp, err := coreGateway.GetToken()
+
+	req := GetReportVaRequest{
+		InstitutionCode: "J104408",
+		BrivaNo:         "77777",
+		StartDate:       "20190918",
+		EndDate:         "20190918",
+	}
+
+	token := tokenResp.AccessToken
+	resp, err := coreGateway.GetReportVA(token, req)
+
+	assert.Equal(bri.T(), true, resp.Status)
+	assert.Equal(bri.T(), "00", resp.ResponseCode)
+	assert.Equal(bri.T(), nil, err)
+}
+
+func (bri *BriSanguTestSuite) TestGetReportVaFailedNoTransaction() {
+	briClient := NewClient()
+	briClient.BaseUrl = "https://sandbox.partner.api.bri.co.id"
+	briClient.ClientId = "p6FGDaCZGoaL8F26dvjCdBfhl8VA0wjf"
+	briClient.ClientSecret = "5L4QGueGYTdzin30"
+	coreGateway := CoreGateway{
+		Client: briClient,
+	}
+	tokenResp, err := coreGateway.GetToken()
+
+	req := GetReportVaRequest{
+		InstitutionCode: "J104408",
+		BrivaNo:         "77777",
+		StartDate:       "20190919",
+		EndDate:         "20190919",
+	}
+
+	token := tokenResp.AccessToken
+	resp, err := coreGateway.GetReportVA(token, req)
+
+	assert.Equal(bri.T(), false, resp.Status)
+	assert.Equal(bri.T(), "41", resp.ResponseCode)
+	assert.Equal(bri.T(), nil, err)
+}
+
+func (bri *BriSanguTestSuite) TestGetReportVaFailedInvalidDateRange() {
+	briClient := NewClient()
+	briClient.BaseUrl = "https://sandbox.partner.api.bri.co.id"
+	briClient.ClientId = "p6FGDaCZGoaL8F26dvjCdBfhl8VA0wjf"
+	briClient.ClientSecret = "5L4QGueGYTdzin30"
+	coreGateway := CoreGateway{
+		Client: briClient,
+	}
+	tokenResp, err := coreGateway.GetToken()
+
+	req := GetReportVaRequest{
+		InstitutionCode: "J104408",
+		BrivaNo:         "77777",
+		StartDate:       "20190917",
+		EndDate:         "20190918",
+	}
+
+	token := tokenResp.AccessToken
+	resp, err := coreGateway.GetReportVA(token, req)
+
+	assert.Equal(bri.T(), false, resp.Status)
+	assert.Equal(bri.T(), "42", resp.ResponseCode)
 	assert.Equal(bri.T(), nil, err)
 }

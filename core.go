@@ -10,6 +10,7 @@ import (
 const (
 	TOKEN_PATH      = "/oauth/client_credential/accesstoken?grant_type=client_credentials"
 	VA_PATH         = "/v1/briva"
+	VA_REPORT_PATH  = "/v1/briva/report"
 	BRI_TIME_FORMAT = "2006-01-02T15:04:05.999Z"
 )
 
@@ -84,6 +85,29 @@ func (gateway *CoreGateway) UpdateVA(token string, req CreateVaRequest) (res VaR
 	}
 
 	err = gateway.Call(method, VA_PATH, headers, strings.NewReader(string(body)), &res)
+
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (gateway *CoreGateway) GetReportVA(token string, req GetReportVaRequest) (res VaReportResponse, err error) {
+	token = "Bearer " + token
+	method := "GET"
+	body := ""
+	timestamp := getTimestamp(BRI_TIME_FORMAT)
+	path := VA_REPORT_PATH + "/" + req.InstitutionCode + "/" + req.BrivaNo + "/" + req.StartDate + "/" + req.EndDate
+	signature := generateSignature(path, method, token, timestamp, string(body), gateway.Client.ClientSecret)
+
+	headers := map[string]string{
+		"Authorization": token,
+		"BRI-Timestamp": timestamp,
+		"BRI-Signature": signature,
+	}
+
+	err = gateway.Call(method, path, headers, strings.NewReader(string(body)), &res)
 
 	if err != nil {
 		return
