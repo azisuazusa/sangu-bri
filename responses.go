@@ -25,11 +25,11 @@ type VaData struct {
 }
 
 type VaReportResponse struct {
-	Status              bool           `json:"status"`
-	ResponseCode        string         `json:"responseCode"`
-	ResponseDescription string         `json:"responseDescription"`
-	ErrDesc             string         `json:"errDesc"`
-	Data                []VaReportData `json:"data"`
+	Status       bool           `json:"status"`
+	ResponseCode string         `json:"responseCode"`
+	Description  string         `json:"Description"`
+	ErrDesc      string         `json:"errDesc"`
+	Data         []VaReportData `json:"Data"`
 }
 
 type VaReportData struct {
